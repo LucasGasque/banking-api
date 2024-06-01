@@ -1,0 +1,94 @@
+import asyncio
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.configs.database import get_session
+from app.controllers.transfer_history import TransferHistoryController
+from app.serializers.transfer_history import (
+    QueryTransferHistorySerializer,
+    ExportTransferHistoryList,
+    ExportAccountTransferHistory,
+)
+from app.controllers.accounts import AccountController
+from app.serializers import QueryPagination
+from app.serializers.auth import AuthTokenPayload
+from app.utils.auth import auth_token
+from app.utils.utils import next_page_url, previous_page_url
+
+transfer_history_router = APIRouter(
+    tags=["Transfer History"], prefix="/transfer_history"
+)
+
+
+@transfer_history_router.get("")
+async def list_transfer_history(
+    request: Request,
+    query_params: QueryTransferHistorySerializer = Depends(),
+    pagination: QueryPagination = Depends(),
+    session: AsyncSession = Depends(get_session),
+    _: AuthTokenPayload = Depends(auth_token),
+) -> ExportTransferHistoryList:
+    controller = TransferHistoryController(session)
+    request.url.replace(query=None)
+    number_of_transfers = await controller.count_transfer_historys(query_params)
+
+    last_page = controller.get_last_page(number_of_transfers, pagination.page_size)
+
+    if pagination.page > last_page and pagination.page > 1:
+        pagination.page = last_page
+
+    transfer_history = await controller.list_transfer_history(
+        query_params,
+        pagination.page_size,
+        (pagination.page - 1) * pagination.page_size,
+    )
+
+    return ExportTransferHistoryList(
+        page=pagination.page,
+        page_size=pagination.page_size,
+        next_page=next_page_url(
+            pagination.page,
+            pagination.page_size,
+            number_of_transfers,
+            request,
+        ),
+        previous_page=previous_page_url(
+            pagination.page,
+            pagination.page_size,
+            number_of_transfers,
+            request,
+        ),
+        total=number_of_transfers,
+        transfer_history=transfer_history,
+    )
+
+
+@transfer_history_router.get("/{account_number}")
+async def fetch_transfer_history_by_account_number(
+    account_number: int,
+    session: AsyncSession = Depends(get_session),
+    _: AuthTokenPayload = Depends(auth_token),
+) -> ExportAccountTransferHistory:
+    controller = TransferHistoryController(session)
+
+    account, transfer_history = await asyncio.gather(
+        AccountController(session).fetch_account(account_number),
+        controller.fetch_transfer_history_by_account_number(account_number),
+    )
+
+    receiving_account = [
+        transfer
+        for transfer in transfer_history
+        if transfer.receiving_account_number == account_number
+    ]
+    sending_account = [
+        transfer
+        for transfer in transfer_history
+        if transfer.sending_account_number == account_number
+    ]
+
+    return ExportAccountTransferHistory(
+        **account.__dict__,
+        sending_transfer_history=sending_account,
+        receiving_transfer_history=receiving_account,
+    )

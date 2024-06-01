@@ -1,0 +1,35 @@
+services:
+  banking-api:
+    build: .
+    container_name: banking-api
+    environment:
+      INIT_MODELS: True
+      DB_USERNAME: postgresql
+      DB_PASSWORD: postgresql
+      DB_HOST: postgresql_database
+      DB_PORT: 5432
+      DB_NAME: db
+    ports:
+      - 8000:8000
+    restart: always
+    volumes:
+      - ./app:/code/app
+
+  postgresql_database:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: postgresql
+      POSTGRES_PASSWORD: postgresql
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: "pg_isready -h db"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgresql_database:
+    name: postgresql_database
