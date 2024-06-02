@@ -1,63 +1,48 @@
-### Objective
 
-Your assignment is to build an internal API for a fake financial institution using Python and any framework.
+<h1 align="center">Test for Entrix selective process</h1>
 
-### Brief
+# ✅ Project Description
 
-While modern banks have evolved to serve a plethora of functions, at their core, banks must provide certain basic features. Today, your task is to build the basic HTTP API for one of those banks! Imagine you are designing a backend API for bank employees. It could ultimately be consumed by multiple frontends (web, iOS, Android etc).
+A backend API with FastAPI and PostgreSQL that allows customers and accounts management for bank employees.
 
-### Tasks
+# ✅ How to run the application
 
-- Implement assignment using:
-  - Language: **Python**
-  - Framework: **any framework except Django** 
-- There should be API routes that allow them to:
-  - Create a new bank account for a customer, with an initial deposit amount. A
-    single customer may have multiple bank accounts.
-  - Transfer amounts between any two accounts, including those owned by
-    different customers.
-  - Retrieve balances for a given account.
-  - Retrieve transfer history for a given account.
-- Write tests for your business logic
+You can run this application with docker, just clone the repository and run:
 
-Feel free to pre-populate your customers with the following:
 
-```json
-[
-  {
-    "id": 1,
-    "name": "Arisha Barron"
-  },
-  {
-    "id": 2,
-    "name": "Branden Gibson"
-  },
-  {
-    "id": 3,
-    "name": "Rhonda Church"
-  },
-  {
-    "id": 4,
-    "name": "Georgina Hazel"
-  }
-]
+```bash
+  docker compose up
 ```
 
-You are expected to design any other required models and routes for your API.
+Docker will then create two containers, one for running the application and another for running the PostgreSQL database.
 
-### Evaluation Criteria
+# ✅ Docs
 
-- **Python** best practices
-- Completeness: did you complete the features?
-- Correctness: does the functionality act in sensible, thought-out ways?
-- Maintainability: is it written in a clean, maintainable way?
-- Testing: is the system adequately tested?
-- Documentation: is the API well-documented?
+You can access the swagger documentation on localhost:8000/docs
 
-### CodeSubmit
+# First steps
 
-Please organize, design, test and document your code as if it were going into production - then push your changes to the master branch. After you have pushed your code, you may submit the assignment on the assignment page.
+1 - Your first step is to create a auth user since most routes are protected by it.
 
-All the best and happy coding,
+![alt text](resources/image-1.png)
 
-The Entrix Team
+2 - Next you can click on the Authorize button:
+
+![alt text](resources/image-2.png)
+
+3 - Insert your credentials here and click on the Authorize button:
+
+![alt text](resources/image-3.png)
+
+4 - You are all set; now you can try the routes.
+
+
+# ✅ Project Status
+
+<h3 align="center">
+    🚀 Concluded 🚀
+</h3>
+
+# 🖥️ Dev
+
+- Made with ❤️ by [Lucas Gasque](https://www.linkedin.com/in/lucasgasque/)

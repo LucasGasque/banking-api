@@ -11,7 +11,6 @@ class BaseAccountSerializer(BaseModel):
 
 class UpdateAccountSerializer(BaseAccountSerializer):
     account_number: int
-    balance: float = Field(ge=0)
 
 
 class AccountSerializer(BaseAccountSerializer):
@@ -31,6 +30,11 @@ class QueryAccountSerializer(BaseModel):
             description="You can pass multiple values separated by commas",
         )
     )
+
+
+class UpdateAccountBalanceSerializer(BaseModel):
+    account_number: int
+    balance: float = Field(ge=0)
 
 
 class ExportAccountList(Pageinfo):

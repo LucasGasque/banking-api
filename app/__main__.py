@@ -8,6 +8,7 @@ from app.views import main_router
 from app.configs.settings import settings
 from app import __version__, app_info
 from app.helpers.dump_sql import DumpSQL
+from starlette_prometheus import PrometheusMiddleware, metrics
 
 
 def add_middlewares(app: FastAPI) -> None:
@@ -18,6 +19,7 @@ def add_middlewares(app: FastAPI) -> None:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(PrometheusMiddleware)
 
 
 def root() -> AppInfo:
@@ -38,7 +40,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     add_middlewares(app)
-    app.add_api_route("/", root, tags=["Info"], include_in_schema=False)
+    app.add_api_route("/", root, tags=["Info"], include_in_schema=False)  # type: ignore
+    app.add_api_route("/metrics", metrics, tags=["Metrics"], include_in_schema=False)  # type: ignore
     app.include_router(main_router)
 
     return app

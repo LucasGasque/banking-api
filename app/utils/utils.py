@@ -1,20 +1,4 @@
-import logging
-from typing import Any
 from fastapi import Request
-
-
-class EndpointFilter(logging.Filter):
-    def __init__(
-        self,
-        path: str,
-        *args: Any,
-        **kwargs: Any,
-    ):
-        super().__init__(*args, **kwargs)
-        self._path = path
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        return record.getMessage().find(self._path) == -1
 
 
 def next_page_url(page: int, page_size: int, total: int, request: Request) -> str:

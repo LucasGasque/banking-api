@@ -5,10 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.configs.database import get_session
 from app.utils.auth import OAuth2Controller
-from app.serializers.auth import AuthToken, AuthSerializer
+from app.serializers.auth import AuthToken, AuthSerializer, BaseAuthSerializer
 from app.controllers.auth import AuthController
 from app.models.auth import Auth
-
 
 auth_router = APIRouter(tags=["Auth"], prefix="/auth")
 
@@ -30,12 +29,14 @@ async def create_auth(
     session: AsyncSession = Depends(get_session),
 ):
     try:
-        return await AuthController(session).create(
+        new_auth = await AuthController(session).create_auth(
             Auth(
                 username=auth.username,
                 password=OAuth2Controller().get_password_hash(auth.password),
             )
         )
+
+        return BaseAuthSerializer(username=new_auth.username)
 
     except IntegrityError:
         raise HTTPException(status_code=409, detail="Username already exists")

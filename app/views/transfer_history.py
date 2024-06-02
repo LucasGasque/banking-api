@@ -1,4 +1,3 @@
-import asyncio
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,8 +7,8 @@ from app.serializers.transfer_history import (
     QueryTransferHistorySerializer,
     ExportTransferHistoryList,
     ExportAccountTransferHistory,
+    TransferHistorySerializer,
 )
-from app.controllers.accounts import AccountController
 from app.serializers import QueryPagination
 from app.serializers.auth import AuthTokenPayload
 from app.utils.auth import auth_token
@@ -30,7 +29,7 @@ async def list_transfer_history(
 ) -> ExportTransferHistoryList:
     controller = TransferHistoryController(session)
     request.url.replace(query=None)
-    number_of_transfers = await controller.count_transfer_historys(query_params)
+    number_of_transfers = await controller.count_transfer_history(query_params)
 
     last_page = controller.get_last_page(number_of_transfers, pagination.page_size)
 
@@ -69,26 +68,20 @@ async def fetch_transfer_history_by_account_number(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> ExportAccountTransferHistory:
-    controller = TransferHistoryController(session)
-
-    account, transfer_history = await asyncio.gather(
-        AccountController(session).fetch_account(account_number),
-        controller.fetch_transfer_history_by_account_number(account_number),
-    )
-
-    receiving_account = [
-        transfer
-        for transfer in transfer_history
-        if transfer.receiving_account_number == account_number
-    ]
-    sending_account = [
-        transfer
-        for transfer in transfer_history
-        if transfer.sending_account_number == account_number
-    ]
+    account = await TransferHistoryController(
+        session
+    ).fetch_transfer_history_by_account_number(account_number)
 
     return ExportAccountTransferHistory(
-        **account.__dict__,
-        sending_transfer_history=sending_account,
-        receiving_transfer_history=receiving_account,
+        account_number=account_number,
+        balance=account.balance,
+        owner_id=account.owner_id,
+        receive_history=[
+            TransferHistorySerializer(**history.__dict__)
+            for history in account.receive_history
+        ],
+        send_history=[
+            TransferHistorySerializer(**history.__dict__)
+            for history in account.send_history
+        ],
     )

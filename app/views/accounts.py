@@ -1,4 +1,3 @@
-import asyncio
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,7 +11,7 @@ from app.serializers.accounts import (
     QueryAccountSerializer,
     ExportAccountList,
     TransferInfo,
-    UpdateAccountSerializer,
+    UpdateAccountBalanceSerializer,
 )
 from app.serializers.transfer_history import TransferHistorySerializer
 from app.serializers import QueryPagination
@@ -91,9 +90,9 @@ async def create_account(
     return AccountSerializer(**new_account.__dict__)
 
 
-@account_router.patch("/")
+@account_router.patch("")
 async def update_balance(
-    transfer_info: UpdateAccountSerializer,
+    transfer_info: UpdateAccountBalanceSerializer,
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> AccountSerializer:
@@ -114,10 +113,14 @@ async def transfer_amount(
 ) -> TransferHistorySerializer:
     controller = AccountController(session)
 
-    receiving_account, sending_account = await asyncio.gather(
-        controller.fetch_account(transfer_info.receiving_account_number),
-        controller.fetch_account(transfer_info.sending_account_number),
+    receiving_account = await controller.fetch_account(
+        transfer_info.receiving_account_number
     )
+    sending_account = await controller.fetch_account(
+        transfer_info.sending_account_number
+    )
+
+    controller.check_transfer_balance(sending_account, transfer_info)
 
     transfer_history = await controller.transfer_balance(
         sending_account,

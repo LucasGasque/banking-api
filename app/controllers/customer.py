@@ -2,7 +2,11 @@ from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.customer import Customer
-from app.serializers.customer import CustomerSerializer, BaseCustomerSerializer
+from app.serializers.customer import (
+    CustomerSerializer,
+    BaseCustomerSerializer,
+    QueryCustomerSerializer,
+)
 from app.utils.make_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
 
@@ -11,12 +15,12 @@ class CustomerController(BaseController):
     def __init__(self, session: AsyncSession) -> None:
         self.__session = session
 
-    def __get_filters(self, query_params) -> set:
+    def __get_filters(self, query_params: QueryCustomerSerializer) -> set:
         return MakeQueryFilters.make_filters(
             string_filters={Customer.name: query_params.name}
         )
 
-    async def count_customers(self, query_params) -> int:
+    async def count_customers(self, query_params: QueryCustomerSerializer) -> int:
         filters = self.__get_filters(query_params)
         result = await self.__session.execute(
             select(func.count(Customer.id)).where(*filters)
@@ -24,7 +28,7 @@ class CustomerController(BaseController):
         return result.scalar() or 0
 
     async def list_customers(
-        self, query_params, limit: int, offset: int
+        self, query_params: QueryCustomerSerializer, limit: int, offset: int
     ) -> list[CustomerSerializer]:
         filters: set = self.__get_filters(query_params)
 

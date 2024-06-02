@@ -43,5 +43,5 @@ class ExportTransferHistoryList(Pageinfo):
 
 
 class ExportAccountTransferHistory(AccountSerializer):
-    sending_transfer_history: list[TransferHistorySerializer]
-    receiving_transfer_history: list[TransferHistorySerializer]
+    receive_history: list[TransferHistorySerializer]
+    send_history: list[TransferHistorySerializer]

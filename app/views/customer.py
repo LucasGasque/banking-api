@@ -97,9 +97,9 @@ async def update_customer(
 
     customer = await controller.fetch_customer(customer_id)
 
-    await controller.update_customer(customer, values_to_update)
+    updated_customer = await controller.update_customer(customer, values_to_update)
 
-    return CustomerSerializer(**customer.__dict__)
+    return CustomerSerializer(**updated_customer.__dict__)
 
 
 @customer_router.delete("/{customer_id}", status_code=204)

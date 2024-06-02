@@ -35,7 +35,7 @@ class OAuth2Controller:
     async def authenticate(
         self, session: AsyncSession, username: str, password: str
     ) -> bool:
-        user = await AuthController(session).fetch(username)
+        user = await AuthController(session).fetch_auth(username)
         if not user:
             return False
         if not self.__verify_password(password, user.password):

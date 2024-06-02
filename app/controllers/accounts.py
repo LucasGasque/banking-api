@@ -7,8 +7,8 @@ from app.serializers.accounts import (
     AccountSerializer,
     TransferInfo,
     UpdateAccountSerializer,
+    QueryAccountSerializer,
 )
-from app.controllers.transfer_history import TransferHistoryController
 from app.models.transfer_history import TransferHistory
 from app.utils.make_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
@@ -17,9 +17,8 @@ from app.utils.base_controller import BaseController
 class AccountController(BaseController):
     def __init__(self, session: AsyncSession) -> None:
         self.__session = session
-        self.__transfer_history_controller = TransferHistoryController(session)
 
-    def __get_filters(self, query_params) -> set:
+    def __get_filters(self, query_params: QueryAccountSerializer) -> set:
         return MakeQueryFilters.make_filters(
             integer_filters={
                 Account.account_number: query_params.account_number,
@@ -27,7 +26,7 @@ class AccountController(BaseController):
             },
         )
 
-    async def count_accounts(self, query_params) -> int:
+    async def count_accounts(self, query_params: QueryAccountSerializer) -> int:
         filters = self.__get_filters(query_params)
         result = await self.__session.execute(
             select(func.count(Account.account_number)).where(*filters)
@@ -69,28 +68,33 @@ class AccountController(BaseController):
         return account  # type: ignore
 
     async def update_balance(
-        self, account: Account, transfer_info: UpdateAccountSerializer
+        self, account: Account, update_info: UpdateAccountSerializer
     ) -> Account:
-        account.balance = transfer_info.balance
+        account.balance = update_info.balance
 
         await self.__session.commit()
         await self.__session.refresh(account)
 
         return account
 
+    def check_transfer_balance(
+        self,
+        sending_account: Account,
+        transfer_info: TransferInfo,
+    ) -> None:
+        if sending_account.balance < transfer_info.amount:
+            raise HTTPException(
+                status_code=400,
+                detail="Insufficient balance in the sending account",
+            )
+
     async def transfer_balance(
         self,
         sending_account: Account,
         receiving_account: Account,
         transfer_info: TransferInfo,
-    ) -> TransferHistory:
+    ):
         try:
-            if sending_account.balance < transfer_info.amount:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Insufficient balance in the sending account",
-                )
-
             receiving_account.balance += transfer_info.amount
             sending_account.balance -= transfer_info.amount
 
@@ -100,9 +104,9 @@ class AccountController(BaseController):
                 amount=transfer_info.amount,
             )
 
-            self.__transfer_history_controller.create(transfer_history)
-            await self.__session.refresh(transfer_history)
+            self.__session.add(transfer_history)
             await self.__session.commit()
+            await self.__session.refresh(transfer_history)
 
             return transfer_history
 

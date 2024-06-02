@@ -1,10 +1,13 @@
-from sqlalchemy import func, or_
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.transfer_history import TransferHistory
 from app.serializers.transfer_history import (
     TransferHistorySerializer,
+    QueryTransferHistorySerializer,
 )
+from app.models.accounts import Account
 from app.utils.make_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
 
@@ -13,7 +16,7 @@ class TransferHistoryController(BaseController):
     def __init__(self, session: AsyncSession) -> None:
         self.__session = session
 
-    def __get_filters(self, query_params) -> set:
+    def __get_filters(self, query_params: QueryTransferHistorySerializer) -> set:
         return MakeQueryFilters.make_filters(
             integer_filters={
                 TransferHistory.id: query_params.id,
@@ -22,10 +25,9 @@ class TransferHistoryController(BaseController):
             }
         )
 
-    def create(self, transfer_history: TransferHistory) -> None:
-        self.__session.add(transfer_history)
-
-    async def count_transfer_historys(self, query_params) -> int:
+    async def count_transfer_history(
+        self, query_params: QueryTransferHistorySerializer
+    ) -> int:
         filters = self.__get_filters(query_params)
         result = await self.__session.execute(
             select(func.count(TransferHistory.id)).where(*filters)
@@ -53,16 +55,15 @@ class TransferHistoryController(BaseController):
     async def fetch_transfer_history_by_account_number(
         self,
         account_number: int,
-    ) -> list[TransferHistorySerializer]:
+    ) -> Account:
         result = await self.__session.execute(
-            select(TransferHistory).where(
-                or_(
-                    TransferHistory.sending_account_number == account_number,
-                    TransferHistory.receiving_account_number == account_number,
-                )
-            )
+            select(Account)
+            .options(joinedload(Account.receive_history))
+            .options(joinedload(Account.send_history))
+            .where(Account.account_number == account_number)
         )
-        return [
-            TransferHistorySerializer(**transfer_history.__dict__)
-            for transfer_history in result.scalars().all()
-        ]
+        account = result.scalars().first()
+
+        self.verify_if_object_exists(account, "Account")
+
+        return account  # type: ignore

@@ -6,5 +6,5 @@ from app.configs.database import Base
 class Customer(Base):
     __tablename__ = "customers"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False)
