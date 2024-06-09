@@ -7,7 +7,6 @@ from app.serializers.transfer_history import (
     QueryTransferHistorySerializer,
     ExportTransferHistoryList,
     ExportAccountTransferHistory,
-    TransferHistorySerializer,
 )
 from app.serializers import QueryPagination
 from app.serializers.auth import AuthTokenPayload
