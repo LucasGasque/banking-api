@@ -68,6 +68,6 @@ async def fetch_transfer_history_by_account_number(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> ExportAccountTransferHistory:
-    return await TransferHistoryController(session).fetch_transfer_history_by_account_number(
-        account_number
-    )
+    return await TransferHistoryController(
+        session
+    ).fetch_transfer_history_by_account_number(account_number)  # type: ignore

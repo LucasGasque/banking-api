@@ -71,7 +71,7 @@ async def fetch_account(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> AccountSerializer:
-    return await AccountController(session).fetch_account(account_number)
+    return await AccountController(session).fetch_account(account_number)  # type: ignore
 
 
 @account_router.post("", status_code=201)
@@ -83,7 +83,7 @@ async def create_account(
     try:
         return await AccountController(session).create_account(
             Account(**new_account.model_dump())
-        )
+        )  # type: ignore
     except IntegrityError:
         raise HTTPException(status_code=404, detail="Customer not found")
 
@@ -98,7 +98,7 @@ async def update_balance(
 
     account = await controller.fetch_account(transfer_info.account_number)
 
-    return await controller.update_balance(account, transfer_info)
+    return await controller.update_balance(account, transfer_info)  # type: ignore
 
 
 @account_router.patch("/transfer")

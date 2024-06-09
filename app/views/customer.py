@@ -69,7 +69,7 @@ async def fetch_customer(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> CustomerSerializer:
-    return await CustomerController(session).fetch_customer(customer_id)
+    return await CustomerController(session).fetch_customer(customer_id)  # type: ignore
 
 
 @customer_router.post("", status_code=201)
@@ -80,7 +80,7 @@ async def create_customer(
 ) -> CustomerSerializer:
     return await CustomerController(session).create_customer(
         Customer(**new_customer.model_dump())
-    )
+    )  # type: ignore
 
 
 @customer_router.patch("/{customer_id}")
@@ -94,7 +94,7 @@ async def update_customer(
 
     customer = await controller.fetch_customer(customer_id)
 
-    return await controller.update_customer(customer, values_to_update)
+    return await controller.update_customer(customer, values_to_update)  # type: ignore
 
 
 @customer_router.delete("/{customer_id}", status_code=204)
