@@ -6,9 +6,10 @@ from app.models.customer import Customer
 from app.controllers.customer import CustomerController
 from app.serializers.customer import (
     QueryCustomerSerializer,
-    BaseCustomerSerializer,
     ExportCustomerList,
     CustomerSerializer,
+    CreateCustomer,
+    UpdateCustomer,
 )
 from app.serializers import QueryPagination
 from app.serializers.auth import AuthTokenPayload
@@ -68,38 +69,32 @@ async def fetch_customer(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> CustomerSerializer:
-    customer = await CustomerController(session).fetch_customer(customer_id)
-
-    return CustomerSerializer(**customer.__dict__)
+    return await CustomerController(session).fetch_customer(customer_id)
 
 
 @customer_router.post("", status_code=201)
 async def create_customer(
-    customer: BaseCustomerSerializer,
+    new_customer: CreateCustomer,
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> CustomerSerializer:
-    new_customer = await CustomerController(session).create_customer(
-        Customer(**customer.model_dump())
+    return await CustomerController(session).create_customer(
+        Customer(**new_customer.model_dump())
     )
-
-    return CustomerSerializer(**new_customer.__dict__)
 
 
 @customer_router.patch("/{customer_id}")
 async def update_customer(
     customer_id: int,
-    values_to_update: BaseCustomerSerializer,
+    values_to_update: UpdateCustomer,
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
-):
+) -> CustomerSerializer:
     controller = CustomerController(session)
 
     customer = await controller.fetch_customer(customer_id)
 
-    updated_customer = await controller.update_customer(customer, values_to_update)
-
-    return CustomerSerializer(**updated_customer.__dict__)
+    return await controller.update_customer(customer, values_to_update)
 
 
 @customer_router.delete("/{customer_id}", status_code=204)
@@ -113,3 +108,5 @@ async def delete_customer(
     customer = await controller.fetch_customer(customer_id)
 
     await controller.delete_customer(customer)
+
+    return None

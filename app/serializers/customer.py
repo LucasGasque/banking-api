@@ -12,6 +12,12 @@ class CustomerSerializer(BaseCustomerSerializer):
     id: int
 
 
+class CreateCustomer(BaseCustomerSerializer): ...
+
+
+class UpdateCustomer(BaseCustomerSerializer): ...
+
+
 class QueryCustomerSerializer(BaseModel):
     name: Optional[str] = Field(
         Query(

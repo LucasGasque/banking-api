@@ -1,7 +1,7 @@
 from app.serializers.accounts import (
     AccountSerializer,
     QueryAccountSerializer,
-    UpdateAccountBalanceSerializer,
+    UpdateAccountBalance,
     TransferInfo,
 )
 from app.models.accounts import Account
@@ -28,7 +28,7 @@ account_model = Account(**account.model_dump())
 
 updated_account_model = Account(**updated_account.model_dump())
 
-update_info = UpdateAccountBalanceSerializer(balance=5000, account_number=1)
+update_info = UpdateAccountBalance(balance=5000, account_number=1)
 
 transfer_info = TransferInfo(
     receiving_account_number=1, amount=1000, sending_account_number=1

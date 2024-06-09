@@ -45,3 +45,7 @@ class ExportTransferHistoryList(Pageinfo):
 class ExportAccountTransferHistory(AccountSerializer):
     receive_history: list[TransferHistorySerializer]
     send_history: list[TransferHistorySerializer]
+
+
+    class ConfigDict:
+        from_attributes = True

@@ -1,17 +1,18 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from app.configs.database import get_session
 from app.models.accounts import Account
 from app.controllers.accounts import AccountController
-from app.controllers.customer import CustomerController
 from app.serializers.accounts import (
-    BaseAccountSerializer,
     AccountSerializer,
     QueryAccountSerializer,
     ExportAccountList,
     TransferInfo,
-    UpdateAccountBalanceSerializer,
+    CreateAccount,
+    UpdateAccountBalance,
 )
 from app.serializers.transfer_history import TransferHistorySerializer
 from app.serializers import QueryPagination
@@ -70,29 +71,26 @@ async def fetch_account(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> AccountSerializer:
-    account = await AccountController(session).fetch_account(account_number)
-
-    return AccountSerializer(**account.__dict__)
+    return await AccountController(session).fetch_account(account_number)
 
 
 @account_router.post("", status_code=201)
 async def create_account(
-    account: BaseAccountSerializer,
+    new_account: CreateAccount,
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> AccountSerializer:
-    await CustomerController(session).fetch_customer(account.owner_id)
-
-    new_account = await AccountController(session).create_account(
-        Account(**account.model_dump())
-    )
-
-    return AccountSerializer(**new_account.__dict__)
+    try:
+        return await AccountController(session).create_account(
+            Account(**new_account.model_dump())
+        )
+    except IntegrityError:
+        raise HTTPException(status_code=404, detail="Customer not found")
 
 
 @account_router.patch("")
 async def update_balance(
-    transfer_info: UpdateAccountBalanceSerializer,
+    transfer_info: UpdateAccountBalance,
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> AccountSerializer:
@@ -100,9 +98,7 @@ async def update_balance(
 
     account = await controller.fetch_account(transfer_info.account_number)
 
-    updated_account = await controller.update_balance(account, transfer_info)
-
-    return AccountSerializer(**updated_account.__dict__)
+    return await controller.update_balance(account, transfer_info)
 
 
 @account_router.patch("/transfer")
@@ -142,3 +138,5 @@ async def delete_account(
     account = await controller.fetch_account(account_number)
 
     await controller.delete_account(account)
+
+    return None

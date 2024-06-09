@@ -6,7 +6,7 @@ from app.models.accounts import Account
 from app.serializers.accounts import (
     AccountSerializer,
     TransferInfo,
-    UpdateAccountBalanceSerializer,
+    UpdateAccountBalance,
     QueryAccountSerializer,
 )
 from app.models.transfer_history import TransferHistory
@@ -68,7 +68,7 @@ class AccountController(BaseController):
         return account  # type: ignore
 
     async def update_balance(
-        self, account: Account, update_info: UpdateAccountBalanceSerializer
+        self, account: Account, update_info: UpdateAccountBalance
     ) -> Account:
         account.balance = update_info.balance
 

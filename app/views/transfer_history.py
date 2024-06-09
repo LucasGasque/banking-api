@@ -68,20 +68,6 @@ async def fetch_transfer_history_by_account_number(
     session: AsyncSession = Depends(get_session),
     _: AuthTokenPayload = Depends(auth_token),
 ) -> ExportAccountTransferHistory:
-    account = await TransferHistoryController(
-        session
-    ).fetch_transfer_history_by_account_number(account_number)
-
-    return ExportAccountTransferHistory(
-        account_number=account_number,
-        balance=account.balance,
-        owner_id=account.owner_id,
-        receive_history=[
-            TransferHistorySerializer(**history.__dict__)
-            for history in account.receive_history
-        ],
-        send_history=[
-            TransferHistorySerializer(**history.__dict__)
-            for history in account.send_history
-        ],
+    return await TransferHistoryController(session).fetch_transfer_history_by_account_number(
+        account_number
     )

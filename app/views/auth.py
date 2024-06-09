@@ -27,16 +27,14 @@ async def loggin(
 async def create_auth(
     auth: AuthSerializer,
     session: AsyncSession = Depends(get_session),
-):
+) -> BaseAuthSerializer:
     try:
-        new_auth = await AuthController(session).create_auth(
+        return await AuthController(session).create_auth(
             Auth(
                 username=auth.username,
                 password=OAuth2Controller().get_password_hash(auth.password),
             )
         )
-
-        return BaseAuthSerializer(username=new_auth.username)
 
     except IntegrityError:
         raise HTTPException(status_code=409, detail="Username already exists")
