@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.customer import Customer
 from app.serializers.customer import (
     CustomerSerializer,
-    BaseCustomerSerializer,
+    UpdateCustomer,
     QueryCustomerSerializer,
 )
 from app.utils.make_filters import MakeQueryFilters
@@ -62,7 +62,7 @@ class CustomerController(BaseController):
         return customer  # type: ignore
 
     async def update_customer(
-        self, customer: Customer, update_info: BaseCustomerSerializer
+        self, customer: Customer, update_info: UpdateCustomer
     ) -> Customer:
         customer.name = update_info.name
         await self.__session.commit()
