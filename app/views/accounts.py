@@ -137,6 +137,4 @@ async def delete_account(
 
     account = await controller.fetch_account(account_number)
 
-    await controller.delete_account(account)
-
-    return None
+    return await controller.delete_account(account)

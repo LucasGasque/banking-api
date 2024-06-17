@@ -107,6 +107,4 @@ async def delete_customer(
 
     customer = await controller.fetch_customer(customer_id)
 
-    await controller.delete_customer(customer)
-
-    return None
+    return await controller.delete_customer(customer)
