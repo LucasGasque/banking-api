@@ -21,7 +21,7 @@ class UpdateCustomer(BaseCustomerSerializer): ...
 class QueryCustomerSerializer(BaseModel):
     name: Optional[str] = Field(
         Query(
-            default="",
+            default=None,
             description="You can pass multiple values separated by commas, and you can pass a LIKE operator such as % or _",
         )
     )

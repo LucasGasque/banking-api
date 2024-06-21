@@ -6,3 +6,4 @@ bcrypt>=4.1.3
 passlib>=1.7.4
 python-jose>=3.3.0
 starlette-prometheus>=0.9.0
+make-query-params-filters>=0.0.0

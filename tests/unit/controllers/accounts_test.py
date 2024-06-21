@@ -2,7 +2,7 @@ import pytest
 from unittest import mock
 from fastapi.exceptions import HTTPException
 from app.controllers.accounts import AccountController
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from app.models.transfer_history import TransferHistory
 from tests.mocks.accounts import (
     query_params,

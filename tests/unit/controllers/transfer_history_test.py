@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from app.controllers.transfer_history import TransferHistoryController
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from tests.mocks.transfer_history import (
     query_params,
     transfer_history_model,

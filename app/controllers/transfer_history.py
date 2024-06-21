@@ -8,7 +8,7 @@ from app.serializers.transfer_history import (
     QueryTransferHistorySerializer,
 )
 from app.models.accounts import Account
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
 
 

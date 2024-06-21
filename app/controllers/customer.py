@@ -7,7 +7,7 @@ from app.serializers.customer import (
     UpdateCustomer,
     QueryCustomerSerializer,
 )
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
 
 

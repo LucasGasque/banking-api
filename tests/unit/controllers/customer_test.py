@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from app.controllers.customer import CustomerController
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from tests.mocks.customer import (
     query_params,
     customer_model,

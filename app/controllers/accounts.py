@@ -10,7 +10,7 @@ from app.serializers.accounts import (
     QueryAccountSerializer,
 )
 from app.models.transfer_history import TransferHistory
-from app.utils.make_filters import MakeQueryFilters
+from make_query_param_filters import MakeQueryFilters
 from app.utils.base_controller import BaseController
 
 
